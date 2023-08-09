@@ -35,6 +35,7 @@ GPIO_Value BACK_LEFT_ORANGE_LED = {LED8_GPIO_Port, LED6_Pin};
 GPIO_Value USER_SW = {SW_GPIO_Port, SW_Pin};
 GPIO_Value SPI_CS_ENC_L = {SPI1_CS_ENC_L_GPIO_Port, SPI1_CS_ENC_L_Pin};
 GPIO_Value SPI_CS_ENC_R = {SPI1_CS_ENC_R_GPIO_Port, SPI1_CS_ENC_R_Pin};
+GPIO_Value SPI_CS_IMU = {SPI1_CS_IMU_GPIO_Port, SPI1_CS_IMU_Pin};
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/

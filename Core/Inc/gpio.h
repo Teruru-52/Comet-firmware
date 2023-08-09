@@ -29,7 +29,6 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
@@ -52,6 +51,7 @@ extern "C" {
   extern GPIO_Value USER_SW;
   extern GPIO_Value SPI_CS_ENC_L;
   extern GPIO_Value SPI_CS_ENC_R;
+  extern GPIO_Value SPI_CS_IMU;
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);

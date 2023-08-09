@@ -1,27 +1,26 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    tim.c
-  * @brief   This file provides code for the configuration
-  *          of the TIM instances.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    tim.c
+ * @brief   This file provides code for the configuration
+ *          of the TIM instances.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -44,9 +43,9 @@ void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
+  htim1.Init.Prescaler = 96-1;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
+  htim1.Init.Period = 1000-1;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -133,9 +132,9 @@ void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
+  htim3.Init.Prescaler = 96-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 1000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
@@ -179,7 +178,7 @@ void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 0;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 65535;
+  htim4.Init.Period = 3200-1;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
@@ -231,8 +230,10 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
     __HAL_RCC_TIM1_CLK_ENABLE();
 
     /* TIM1 interrupt Init */
-    HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 15, 0);
+    HAL_NVIC_SetPriority(TIM1_BRK_TIM9_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(TIM1_BRK_TIM9_IRQn);
+    HAL_NVIC_SetPriority(TIM1_UP_TIM10_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
   /* USER CODE BEGIN TIM1_MspInit 1 */
 
   /* USER CODE END TIM1_MspInit 1 */
@@ -362,6 +363,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 
     /* TIM1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(TIM1_BRK_TIM9_IRQn);
+    HAL_NVIC_DisableIRQ(TIM1_UP_TIM10_IRQn);
   /* USER CODE BEGIN TIM1_MspDeInit 1 */
 
   /* USER CODE END TIM1_MspDeInit 1 */
@@ -407,5 +409,55 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* tim_pwmHandle)
 }
 
 /* USER CODE BEGIN 1 */
+MOTOR motorL = {ENABLE, &htim4, TIM_CHANNEL_1, TIM_CHANNEL_2};
+MOTOR motorR = {ENABLE, &htim4, TIM_CHANNEL_3, TIM_CHANNEL_4};
 
+void PWM_Start(MOTOR *motor)
+{
+  if (HAL_TIM_PWM_Start(motor->htim, motor->CH_IN_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Start(motor->htim, motor->CH_IN_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  motor->OutputPWM = ENABLE;
+}
+
+void PWM_Stop(MOTOR *motor)
+{
+  if (HAL_TIM_PWM_Stop(motor->htim, motor->CH_IN_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Stop(motor->htim, motor->CH_IN_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PWM_Update(motor, 0);
+  motor->OutputPWM = DISABLE;
+}
+
+void PWM_Set(MOTOR *motor, int duty)
+{
+  if (duty > 0)
+  {
+    __HAL_TIM_SET_COMPARE(motor->htim, motor->CH_IN_1, MAX_INPUT - duty);
+    __HAL_TIM_SET_COMPARE(motor->htim, motor->CH_IN_2, MAX_INPUT);
+  }
+  else
+  {
+    __HAL_TIM_SET_COMPARE(motor->htim, motor->CH_IN_1, MAX_INPUT);
+    __HAL_TIM_SET_COMPARE(motor->htim, motor->CH_IN_2, MAX_INPUT + duty);
+  }
+}
+
+void PWM_Update(MOTOR *motor, int duty)
+{
+  if (motor->OutputPWM == DISABLE)
+    PWM_Start(motor);
+
+  PWM_Set(motor, duty);
+}
 /* USER CODE END 1 */

@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    spi.c
-  * @brief   This file provides code for the configuration
-  *          of the SPI instances.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    spi.c
+ * @brief   This file provides code for the configuration
+ *          of the SPI instances.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "spi.h"
@@ -115,5 +115,42 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 }
 
 /* USER CODE BEGIN 1 */
+SPI_Value spi_encoderL = {&hspi1, &SPI_CS_ENC_L};
+SPI_Value spi_encoderR = {&hspi1, &SPI_CS_ENC_R};
+SPI_Value spi_imu = {&hspi1, &SPI_CS_IMU};
 
+uint8_t Read_1byte(SPI_Value *spi_value, uint8_t reg, uint16_t size, uint32_t timeout)
+{
+  uint8_t rx_data[2];
+  uint8_t tx_data[2];
+
+  tx_data[0] = reg | 0x80;
+  tx_data[1] = 0x00; // dummy
+
+  Write_GPIO(*(spi_value->SPI_CS), GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(spi_value->hspi, tx_data, rx_data, size, timeout);
+  Write_GPIO(*(spi_value->SPI_CS), GPIO_PIN_SET);
+
+  return rx_data[1];
+}
+
+uint16_t Read_2byte(SPI_Value *spi_value, uint8_t reg1, uint8_t reg2, uint16_t size, uint32_t timeout)
+{
+  uint8_t rx_data[2];
+  uint8_t tx_data[2];
+  // tx_data[0] = 0x3F;
+  // tx_data[0] = 0xEF; // 何故か読める
+  // tx_data[1] = 0xFF;
+  tx_data[0] = reg1;
+  tx_data[1] = reg2;
+
+  Write_GPIO(*(spi_value->SPI_CS), GPIO_PIN_RESET);
+  HAL_SPI_TransmitReceive(spi_value->hspi, tx_data, rx_data, size, timeout);
+  Write_GPIO(*(spi_value->SPI_CS), GPIO_PIN_SET);
+
+  // int16_t data = (int16_t)((int16_t)(rx_data[0] | (0x3F & rx_data[1]) << 8));
+  int16_t data = (int16_t)((int16_t)(rx_data[0] << 8) | rx_data[1]);
+
+  return data;
+}
 /* USER CODE END 1 */

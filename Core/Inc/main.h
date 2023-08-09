@@ -38,30 +38,30 @@ extern "C"
 #include <string.h>
 #include <math.h>
 
-#include "cmsis_os.h"
+// #include "cmsis_os.h"
 #include "adc.h"
-#include "spi.h"
-#include "tim.h"
 #include "gpio.h"
-  /* USER CODE END Includes */
+// #include "spi.h" // circular reference
+#include "tim.h"
+    /* USER CODE END Includes */
 
-  /* Exported types ------------------------------------------------------------*/
-  /* USER CODE BEGIN ET */
+    /* Exported types ------------------------------------------------------------*/
+    /* USER CODE BEGIN ET */
 
-  /* USER CODE END ET */
+    /* USER CODE END ET */
 
-  /* Exported constants --------------------------------------------------------*/
-  /* USER CODE BEGIN EC */
+    /* Exported constants --------------------------------------------------------*/
+    /* USER CODE BEGIN EC */
 
-  /* USER CODE END EC */
+    /* USER CODE END EC */
 
-  /* Exported macro ------------------------------------------------------------*/
-  /* USER CODE BEGIN EM */
+    /* Exported macro ------------------------------------------------------------*/
+    /* USER CODE BEGIN EM */
 
-  /* USER CODE END EM */
+    /* USER CODE END EM */
 
-  /* Exported functions prototypes ---------------------------------------------*/
-  void Error_Handler(void);
+    /* Exported functions prototypes ---------------------------------------------*/
+    void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -93,9 +93,9 @@ extern "C"
 #define LED5_Pin GPIO_PIN_5
 #define LED5_GPIO_Port GPIOB
 
-  /* USER CODE BEGIN Private defines */
+    /* USER CODE BEGIN Private defines */
 
-  /* USER CODE END Private defines */
+    /* USER CODE END Private defines */
 
 #ifdef __cplusplus
 }
