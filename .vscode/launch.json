@@ -1,5 +1,4 @@
 {
-    "version": "0.2.0",
     "configurations": [
         {
             "name": "Cortex Debug",
@@ -8,15 +7,13 @@
             "request": "launch",
             "preLaunchTask": "Halfmouse Build",
             "type": "cortex-debug",
-            "servertype": "openocd",
-            "configFiles": [
-                "interface/stlink-v2-1.cfg",
-                "target/stm32f4x.cfg"
-                // "board/st_nucleo_f4.cfg"
-            ],
-            "postLaunchCommands": [
-                "monitor arm semihosting enable"
-            ]
+            "showDevDebugOutput": "raw",
+            "armToolchainPath": "/opt/gcc-arm-none-eabi/bin",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
+            "device": "STM32F411CE",
+            "interface": "swd",
+            "svdFile": "${workspaceRoot}/STM32F411.svd"
         }
     ]
 }
